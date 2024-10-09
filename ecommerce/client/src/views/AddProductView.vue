@@ -1,5 +1,5 @@
 <template>
-    <div class="min-h-screen flex items-center justify-center border-t border-gray-100">
+    <div v-if="user" class="min-h-screen flex items-center justify-center border-t border-gray-100">
         <div class="border mt-2 p-6 rounded-md w-full md:w-2/3 lg:w-1/2 xl:w-1/3">
         <div v-if="message" class="bg-red-500 mb-2 text-white p-2 rounded">{{ message }}</div>
         <h2 class="text-2xl font-semibold mb-6">Add New Product</h2>
@@ -50,12 +50,15 @@
         </div>
         </div>
     </div>
+    <div v-else>
+      <div class="bg-red-500 mb-2 text-white p-2 rounded">Acccess denied</div>
+    </div>
 </template>
 
 <script>
 import ProductDataService from '@/services/ProductDataService'
 export default {
-  props: ['addInv'],
+  props: ['addInv', 'user'],
   data () {
     return {
       message: null,

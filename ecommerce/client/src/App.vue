@@ -19,8 +19,17 @@
           <li>
             <router-link to="/" class="block py-2 px-3 text-white bg-blue-700 rounded md:bg-transparent md:text-blue-700 md:p-0 md:dark:text-blue-500" aria-current="page">Home</router-link>
           </li>
-          <li>
+          <li v-if="user">
             <router-link to="add-product" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700">Add Product</router-link>
+          </li>
+          <li>
+            <router-link to="user" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700">Add User</router-link>
+          </li>
+          <li v-if="!user">
+            <router-link to="login" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700">Login</router-link>
+          </li>
+          <li v-if="user">
+            <span @click="logout" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700">Logout</span>
           </li>
         </ul>
       </div>
@@ -32,6 +41,7 @@
     :addInv = "addInventory"
     :updateInv = "updateInventory"
     :removeInv = "removeInventory"
+    :user="user"
     />
     <MainFooter/>
     <SideBar
@@ -48,6 +58,8 @@
 import MainFooter from '@/components/MainFooter.vue'
 import SideBar from '@/components/SideBar.vue'
 import ProductDataService from '@/services/ProductDataService'
+import UserDataService from '@/services/UserDataService'
+import { mapGetters } from 'vuex'
 export default {
   components: {
     MainFooter,
@@ -57,6 +69,13 @@ export default {
     ProductDataService.getAll()
       .then(response => {
         this.inventory = response.data
+      })
+    UserDataService.getAuth()
+      .then(response => {
+        this.$store.dispatch('user', response.data)
+      })
+      .catch(e => {
+        this.$store.dispatch('user', null)
       })
   },
   data () {
@@ -86,6 +105,14 @@ export default {
     },
     removeInventory (index) {
       this.inventory.splice(index, 1)
+    },
+    logout () {
+      UserDataService.getLogout()
+        .then(response => {
+          localStorage.removeItem('token')
+          this.$store.dispatch('user', null)
+          this.$router.push('login')
+        })
     }
   },
   computed: {
@@ -93,7 +120,8 @@ export default {
       return Object.values(this.cart).reduce((acc, curr) => {
         return acc + curr
       }, 0)
-    }
+    },
+    ...mapGetters(['user'])
   }
 }
 </script>

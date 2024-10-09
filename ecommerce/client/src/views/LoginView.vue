@@ -41,7 +41,11 @@ export default {
     login () {
       UserDataService.postLogin(this.user)
         .then(response => {
+          // console.log(response.data)
+          localStorage.setItem('token', response.data.token)
+          this.$store.dispatch('user', response.data.user)
           this.message = null
+          this.$router.push({ name: 'home' })
         })
         .catch(error => {
           this.message = error.response.data.message
